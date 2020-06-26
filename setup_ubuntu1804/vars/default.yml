@@ -1,4 +1,4 @@
 ---
-create_user: sammy
-copy_local_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
-sys_packages: [ 'curl', 'vim', 'git', 'ufw']
+create_user: mdiener
+copy_local_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/md-xps9560.pub') }}"
+sys_packages: [ 'curl', 'vim', 'git', 'ufw', 'fail2ban', 'unattended-upgrades', 'htop']

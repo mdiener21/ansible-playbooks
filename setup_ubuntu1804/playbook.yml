@@ -1,6 +1,6 @@
-#################################################
-# DO Community Playbooks: Initial Server Setup
-#################################################
+##########################################################
+# DO Community Playbooks: Initial Ubunut18.04 Server Setup
+##########################################################
 ---
 - hosts: all
   become: true
@@ -12,17 +12,17 @@
       apt: name=aptitude update_cache=yes state=latest force_apt_get=yes
 
 # Sudo Group Setup
-    - name: Make sure we have a 'wheel' group
+    - name: Make sure we have a 'admin' group
       group:
-        name: wheel
+        name: admin
         state: present
 
-    - name: Allow 'wheel' group to have passwordless sudo
+    - name: Allow 'admin' group to have passwordless sudo
       lineinfile:
         path: /etc/sudoers
         state: present
-        regexp: '^%wheel'
-        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        regexp: '^%admin'
+        line: '%admin ALL=(ALL) NOPASSWD: ALL'
         validate: '/usr/sbin/visudo -cf %s'
 
 # User + Key Setup
@@ -30,7 +30,7 @@
       user:
         name: "{{ create_user }}"
         state: present
-        groups: wheel
+        groups: admin
         append: true
         create_home: true
         shell: /bin/bash
@@ -41,12 +41,20 @@
         state: present
         key: "{{ copy_local_key }}"
 
-    - name: Disable password authentication for root
+    - name: Disable root login
       lineinfile:
         path: /etc/ssh/sshd_config
         state: present
         regexp: '^#?PermitRootLogin'
-        line: 'PermitRootLogin prohibit-password'
+        line: 'PermitRootLogin no'
+
+    - name: Disallow password authentication
+      lineinfile: 
+        path: /etc/ssh/sshd_config
+        state: present
+        regexp: '^PasswordAuthentication'
+        line: 'PasswordAuthentication no'
+      notify: Restart ssh
 
 # Install Packages
     - name: Update apt
