@@ -1,0 +1,58 @@
+version: '3.7'
+
+services:
+  django-indrz:
+    build: ./app_indrz
+    volumes:
+      - ./app_indrz/:/usr/src/app/
+    networks:  # <-- here
+      - nginx_network
+      - db_network
+    ports:
+    - 8001:8000
+    env_file:
+    - ./.env_indrz.dev
+    depends_on:
+    - db_indrz
+
+  django-golfgis:
+    build: ./app_golfgis
+    volumes:
+      - ./app_golfgis/:/usr/src/app/
+    networks:  # <-- here
+      - nginx_network
+      - db_network
+    ports:
+      - 8002:8000
+    env_file:
+      - ./.env_golfgis.dev
+    depends_on:
+      - db_golfgis
+
+  db-indrz:
+    image: postgres:12.0-alpine
+    env_file:  # <-- we use the previously defined values
+    - config/db/db_indrz_env
+    networks:  # <-- connect to the bridge
+    - db_indrz_network
+    volumes:
+      - db_indrz_volume:/var/lib/postgresql/data/
+
+  db-golfgis:
+    image: postgres:12.0-alpine
+    env_file:  # <-- we use the previously defined values
+    - config/db/db_golfgis_env
+    networks:  # <-- connect to the bridge
+    - db_golfgis_network
+    volumes:
+        - db_indrz_volume:/var/lib/postgresql/data/
+volumes:
+  db_indrz_volume:
+
+networks:  # <-- and here
+  nginx_network:
+    driver: bridge
+  db_indrz_network:  # <-- add the bridge
+    driver: bridge
+  db_golfgis_network:  # <-- add the bridge
+    driver: bridge
